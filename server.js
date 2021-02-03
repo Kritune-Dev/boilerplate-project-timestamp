@@ -9,7 +9,7 @@ require('dotenv').config()
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
 // so that your API is remotely testable by FCC 
 var cors = require('cors');
-app.use(cors({optionsSuccessStatus: 200}));  // some legacy browsers choke on 204
+app.use(cors({ optionsSuccessStatus: 200 }));  // some legacy browsers choke on 204
 
 //My Own LoggerMiddleware
 app.use((req, rest, next) => {
@@ -28,31 +28,33 @@ app.get("/", function (req, res) {
 
 // your first API endpoint... 
 app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
+  res.json({ greeting: 'hello API' });
 });
 
-app.get("/api/timestamp/:time", function (req, res) {
+app.get("/api/timestamp/:time?", function (req, res) {
   var time = req.params.time
-
-  if(!isValidDate(time))
-  {
-    time = new Date(parseInt(time));
+  if (time) {
+    if (/\d{5,}/.test(time)) {
+      const dateInt = parseInt(time);
+      //Date regards numbers as unix timestamps, strings are processed differently
+      res.json({ unix: dateInt, utc: new Date(dateInt).toUTCString() });
+    } else {
+      let dateObject = new Date(time);
+  
+      if (dateObject.toString() === "Invalid Date") {
+        res.json({ error: "Invalid Date" });
+      } else {
+        res.json({ unix: dateObject.valueOf(), utc: dateObject.toUTCString() });
+      }
+    }
   }
-
-  try {
-    var dateUnix = new Date(time)
-    const message = {unix: dateUnix.getTime(), utc: dateUnix.toUTCString()}
+  else
+  {
+    var date = new Date()
+    const message = { unix: date.getTime(), utc: date.toUTCString() }
     res.json(message)
   }
-  catch {
-    res.json({ error : "Invalid Date" })
-  }
 });
-
-function isValidDate(d) {
-  d = new Date(d);
-  return d instanceof Date && !isNaN(d);
-}
 
 
 // listen for requests :)
