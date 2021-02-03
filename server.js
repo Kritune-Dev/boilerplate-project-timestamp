@@ -4,11 +4,18 @@
 // init project
 var express = require('express');
 var app = express();
+require('dotenv').config()
 
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
 // so that your API is remotely testable by FCC 
 var cors = require('cors');
 app.use(cors({optionsSuccessStatus: 200}));  // some legacy browsers choke on 204
+
+//My Own LoggerMiddleware
+app.use((req, rest, next) => {
+  console.log(req.method + " " + req.path + " " + req.ip);
+  next()
+})
 
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static('public'));
